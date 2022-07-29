@@ -45,7 +45,7 @@ public class QualitisRefQueryOperation extends QualitisDevelopmentOperation<Thir
         String env = qualitisOpenRequestRef.getDSSLabels().stream().filter(dssLabel -> dssLabel instanceof EnvDSSLabel)
             .map(dssLabel -> (EnvDSSLabel) dssLabel).findAny().get().getEnv();
         Long projectId = qualitisOpenRequestRef.getRefProjectId();
-        String redirectUrl = "http://" + host + ":" + port + "/#/addGroupTechniqueRule?tableType=1&id=" + projectId + "&ruleGroupId=${ruleGroupId}&nodeId=${nodeId}&contextID=${contextID}&nodeName=${nodeName}";
+        String redirectUrl = "https://qualitis-open.wedatasphere.com/#/addGroupTechniqueRule?tableType=1&id=" + projectId + "&ruleGroupId=${ruleGroupId}&nodeId=${nodeId}&contextID=${contextID}&nodeName=${nodeName}";
         return url + "?redirect=" + URLEncoder.encode(redirectUrl + "&env=" + env.toLowerCase(), "UTF-8") + "&dssurl=${dssurl}&cookies=${cookies}";
     }
 
@@ -60,11 +60,11 @@ public class QualitisRefQueryOperation extends QualitisDevelopmentOperation<Thir
     @Override
     public QueryJumpUrlResponseRef query(QueryJumpUrlRequestRefImpl qualitisOpenRequestRef) throws ExternalOperationFailedException {
         try {
-            String baseUrl = getAppInstance().getBaseUrl() + "qualitis/api/v1/redirect";
+            String baseUrl = "https://qualitis-open.wedatasphere.com/qualitis/api/v1/redirect";
             LOGGER.info("Get base url from app instancd and retur redirect url: " + baseUrl);
             URL url = new URL(baseUrl);
-            String host = url.getHost();
-            int port = url.getPort();
+            String host = "";
+            int port = 80;
             String retJumpUrl = getEnvUrl(baseUrl, host, port, qualitisOpenRequestRef);
             return QueryJumpUrlResponseRef.newBuilder().setJumpUrl(retJumpUrl).success();
         } catch (Exception e) {

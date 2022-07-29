@@ -18,6 +18,7 @@ package com.webank.wedatasphere.qualitis.filter;
 
 import com.webank.wedatasphere.qualitis.config.JerseyConfig;
 import com.webank.wedatasphere.qualitis.constant.SpecCharEnum;
+import com.webank.wedatasphere.qualitis.controller.RedirectController;
 import com.webank.wedatasphere.qualitis.service.LoginService;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,15 @@ import java.io.IOException;
  */
 public class UnFilterUrlFilter implements Filter {
 
+    private static final String REDIRECT_URL = JerseyConfig.APPLICATION_PATH + "/api/v1/redirect";
     private static final String LOGOUT_URL = JerseyConfig.APPLICATION_PATH + "/api/v1/logout";
     private static final String LOGIN_RANDOM = "loginRandom";
 
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    private RedirectController redirectController;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -54,6 +59,8 @@ public class UnFilterUrlFilter implements Filter {
             String queryParam = ((HttpServletRequest) request).getQueryString();
             if (loginRandom != null && queryParam != null && queryParam.equals(LOGIN_RANDOM + SpecCharEnum.EQUAL.getValue() + loginRandom.intValue())) {
                 loginService.logout(httpServletRequest, httpServletResponse);
+            } else if (requestUrl.equals(REDIRECT_URL)) {
+                redirectController.redirectToCoordinatePage(httpServletRequest, httpServletResponse);
             } else {
                 return;
             }

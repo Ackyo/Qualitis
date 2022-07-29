@@ -1,8 +1,11 @@
 package com.webank.wedatasphere.qualitis.controller;
 
 import javax.servlet.http.HttpServletRequest;
+
+import com.webank.wedatasphere.qualitis.config.FrontEndConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +24,8 @@ public class ErrorCustomController implements ErrorController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorCustomController.class);
 
-    @Value("${server.port}")
-    private int port;
+    @Autowired
+    private FrontEndConfig frontEndConfig;
 
     @Override
     public String getErrorPath() {
@@ -76,7 +79,7 @@ public class ErrorCustomController implements ErrorController {
             + "    </ul>\n"
             + "  </div>\n"
             + "  <div class=\"notfound-btn-container\"> \n"
-            + "  <a class=\"notfound-btn\" href=\"http://" + request.getLocalAddr() + ":" + port + "/\">返回首页</a> \n"
+            + "  <a class=\"notfound-btn\" href=\"" + frontEndConfig.getHomePage() + "/\">返回首页</a> \n"
             + "  <a class=\"notfound-btn\" href=\"javascript:history.go(-1);\">返回上一页</a>\n"
             + "</div>\n"
             + "  \n"

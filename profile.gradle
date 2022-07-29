@@ -36,11 +36,13 @@ project(':web/app') {
 //    compile libs.dssAppJointAuth
     compile (libs.dssSso) {
       exclude group: 'org.reflections'
+//      exclude group: 'org.springframework'
       exclude group: 'org.apache.logging.log4j'
       exclude group: 'org.glassfish.jersey.media'
     }
     compile (libs.dssSpringSso) {
       exclude group: 'org.reflections'
+//      exclude group: 'org.springframework'
       exclude group: 'org.apache.logging.log4j'
       exclude group: 'org.glassfish.jersey.media'
     }
@@ -245,11 +247,18 @@ project(':core/common') {
 
       configurations {
         compile.exclude group: 'org.codehaus.jackson', module: 'jackson-mapper-asl'
+        compile.exclude group: 'com.google.protobuf', module: 'protobuf-java'
         compile.exclude group: 'org.mortbay.jetty', module: 'jetty-util'
         compile.exclude group: 'org.mortbay.jetty', module: 'jetty'
-        compile.exclude group: 'com.google.protobuf', module: 'protobuf-java'
+        compile.exclude group: 'org.glassfish.jersey.core'
         compile.exclude group: 'io.netty', module: 'netty'
       }
+    }
+    compile('org.glassfish.jersey.core:jersey-server:2.31'){
+      force = true
+    }
+    compile('xerces:xercesImpl:2.12.2'){
+      force = true
     }
     compile('org.apache.commons:commons-compress:1.21'){
       force = true

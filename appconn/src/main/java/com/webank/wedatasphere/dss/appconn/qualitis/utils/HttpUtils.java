@@ -28,6 +28,12 @@ public class HttpUtils {
     public static URI buildUrI(String baseUrl, String path, String appId, String appToken,
         String nonce, String timestamp) throws NoSuchAlgorithmException, URISyntaxException {
         String signature = getSignature(appId, appToken, nonce, timestamp);
+        if (baseUrl.contains("https://qualitis-open.wedatasphere.com:80")) {
+            baseUrl = baseUrl.replace("https://qualitis-open.wedatasphere.com:80", "http://192.168.241.2:8090");
+        } else if (baseUrl.contains("https://qualitis-open.wedatasphere.com")) {
+            baseUrl = baseUrl.replace("https://qualitis-open.wedatasphere.com", "http://192.168.241.2:8090");
+        }
+
         StringBuffer uriBuffer = new StringBuffer(baseUrl);
         uriBuffer.append(path).append("?")
             .append("app_id=").append(appId).append("&")
