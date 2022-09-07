@@ -92,7 +92,7 @@ linkis:
       datasource_publish: data-source-manager/publish
       datasource_info_name: data-source-manager/info/name
       datasource_connect: data-source-manager/op/connect/json
-      datasource_connect_param: data-source-manager/{DATA_SOURCE_ID}/connect_params
+      datasource_connect_param: data-source-manager/{DATA_SOURCE_ID}/connect-params
       datasource_key_define: data-source-manager/key_define/type
       datasource_expire: data-source-manager/info/{DATA_SOURCE_ID}/expire
       datasource_modify: data-source-manager/info/{DATA_SOURCE_ID}/json

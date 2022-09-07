@@ -22,8 +22,8 @@ export const RuleMixin = {
                     currentPage: 1,
                     pageSize: this.maxSize
                 }, 'get').then((res) => {
-                    if (!Array.isArray(res.query_list)) resolve([]);
-                    resolve(res.query_list);
+                    if (!Array.isArray(res.queryList)) resolve([]);
+                    resolve(res.queryList);
                 }).catch((error) => {
                     console.error(error);
                     resolve([]);
