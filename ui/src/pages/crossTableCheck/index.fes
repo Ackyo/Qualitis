@@ -1501,21 +1501,29 @@ export default {
         getMapField() {
             //获取mappings里面的字段，sql预览展示
             if (this.mappings.length > 0) {
+                const reg = /\((.*)\)/;
+
                 this.mappings.map((item)=> {
                     item.left.map((it)=> {
+                       let data = it.column_name.match(reg) || [];
+                       let column_name = it.column_name.replace(data[0] || '', '');
+
                         if (it.column_name.indexOf('tmp1.') > -1) {
-                            this.source_column_is_null.push(it.column_name);
+                            this.source_column_is_null.push(column_name);
                         }
                         if (it.column_name.indexOf('tmp2.') > -1) {
-                            this.target_column_is_null.push(it.column_name);
+                            this.target_column_is_null.push(column_name);
                         }
                     })
                     item.right.map((t)=> {
+                        let data = t.column_name.match(reg) || [];
+                        let column_name = t.column_name.replace(data[0] || '', '');
+
                         if (t.column_name.indexOf('tmp1.') > -1) {
-                            this.source_column_is_null.push(t.column_name);
+                            this.source_column_is_null.push(column_name);
                         }
                         if (t.column_name.indexOf('tmp2.') > -1) {
-                            this.target_column_is_null.push(t.column_name);
+                            this.target_column_is_null.push(column_name);
                         }
                     })
                 })

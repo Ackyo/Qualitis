@@ -1241,8 +1241,8 @@ insert into qualitis_template_output_meta(template_id, output_name, field_name, 
 
 -- 附属模版
 insert into qualitis_template(id, name, cluster_num, db_num, table_num, field_num, datasource_type, mid_table_action, template_type, action_type, save_mid_table, show_sql, parent_template_id)
-	values(18, "{&MULTI-TABLE_ACCURACY_VERIFICATION_CHILD_TEMPLATE}", 1, 2, 2, 0, 1, "SELECT tmp1.* FROM (SELECT * FROM ${source_db}.${source_table} WHERE ${filter_left}) tmp1 LEFT JOIN (SELECT * FROM ${target_db}.${target_table} WHERE ${filter_right}) tmp2 ON ${mapping_argument} WHERE ( NOT (${source_column_is_null}) AND (${target_column_is_null}) )", 3, 1, true,
-	"SELECT count(tmp1.*) FROM (SELECT * FROM ${source_db}.${source_table} WHERE ${filter_left}) tmp1 LEFT JOIN (SELECT * FROM ${target_db}.${target_table} WHERE ${filter_right}) tmp2 ON ${mapping_argument} WHERE ( NOT (${source_column_is_null}) AND (${target_column_is_null}) )", 17);
+	values(18, "{&MULTI-TABLE_ACCURACY_VERIFICATION_CHILD_TEMPLATE}", 1, 2, 2, 0, 1, "SELECT tmp1.* FROM (SELECT * FROM ${source_db}.${source_table} WHERE ${filter_left}) tmp1 LEFT JOIN (SELECT * FROM ${target_db}.${target_table} WHERE ${filter_right}) tmp2 ON ${mapping_argument} WHERE ${filter} AND ( NOT (${source_column_is_null}) AND (${target_column_is_null}) )", 3, 1, true,
+	"SELECT count(tmp1.*) FROM (SELECT * FROM ${source_db}.${source_table} WHERE ${filter_left}) tmp1 LEFT JOIN (SELECT * FROM ${target_db}.${target_table} WHERE ${filter_right}) tmp2 ON ${mapping_argument} WHERE ${filter} AND ( NOT (${source_column_is_null}) AND (${target_column_is_null}) )", 17);
 
 insert into qualitis_template_mid_table_input_meta(name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description)
 	values("{&SOURCE_DATABASE}", 18, "source_db", 11, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${source_db}");
@@ -1258,6 +1258,8 @@ insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeh
 	values(20001, "{&SOURCE_TABLE_COLUMN_IS_NULL}", 18, "source_column_is_null", 10, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${source_column_is_null}", "${source_column} IS NULL");
 insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description, concat_template)
 	values(20002, "{&TARGET_TABLE_COLUMN_IS_NULL}", 18, "target_column_is_null", 10, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${target_column_is_null}", "${target_column} IS NULL");
+insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description)
+	values(20003, "{&FILTER_IN_RESULT}", 18, "filter", 9, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${filter}", "${filter}");
 
 insert into qualitis_template_mid_table_input_meta(name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description, parent_id)
 	values("{&JOIN_LEFT_EXPRESSION}", null, "left_statement", 15, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${left_statement}", 20000);

@@ -310,18 +310,48 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
         if (RuleTemplateTypeEnum.MULTI_SOURCE_TEMPLATE.getCode().equals(rule.getTemplate().getTemplateType()) && dbTableMap.size() > 0) {
             // Import sql function.
             sqlList.addAll(getImportSql());
+            String concatJsonValuesUdf="def concatJsonValues(s: String) = {\n"
+                + "  val mapper = new ObjectMapper() with ScalaObjectMapper\n"
+                + "  mapper.registerModule(DefaultScalaModule)\n"
+                + "  val parsedJson = mapper.readValue[Map[String, Object]](s)\n"
+                + "  parsedJson.values.mkString(\",\")\n"
+                + "}\n"
+                + "val concat_json_values = udf(concatJsonValues _)\n";
+
+            sqlList.add(concatJsonValuesUdf);
+
             // Generate UUID.
             // Transform original table.
-            Set<String> columns = new HashSet<>();
+            List<String> leftColumnList = new ArrayList<>();
+            List<String> rightColumnList = new ArrayList<>();
+
             if (rule.getTemplate().getId().longValue() == MUL_SOURCE_ACCURACY_TEMPLATE_ID.longValue()) {
                 // Get accuracy columns.
-                columns = rule.getRuleDataSourceMappings().stream().map(RuleDataSourceMapping::getLeftColumnNames)
-                    .map(column -> column.replace("tmp1.", "").replace("tmp2.", "")).collect(Collectors.toSet());
+                leftColumnList = rule.getRuleDataSourceMappings().stream()
+                    .map(RuleDataSourceMapping::getLeftColumnNames)
+                    .map(column -> column.replace("tmp1.", "").replace("tmp2.", ""))
+                    .collect(Collectors.toList());
+
+                rightColumnList = rule.getRuleDataSourceMappings().stream()
+                    .map(RuleDataSourceMapping::getRightColumnNames)
+                    .map(column -> column.replace("tmp1.", "").replace("tmp2.", ""))
+                    .collect(Collectors.toList());
+
+                Set<String> leftColumnSet = new HashSet<>();
+                for (int i = 0; i < leftColumnList.size(); i++) {
+                    if (leftColumnSet.contains(leftColumnList.get(i))) {
+                        leftColumnList.remove(i);
+                        rightColumnList.remove(i);
+                        --i;
+                    } else {
+                        leftColumnSet.add(leftColumnList.get(i));
+                    }
+                }
             }
             if (rule.getTemplate().getId().longValue() == MUL_SOURCE_COMMON_TEMPLATE_ID.longValue()) {
                 sqlList.addAll(getCommonTransformSql(dbTableMap, mappings, count, partition.toString(), filters, sourceConnect, targetConnect));
             } else {
-                sqlList.addAll(getSpecialTransformSql(dbTableMap, count, partition.toString(), filters, Strings.join(columns, ','), sourceConnect, targetConnect));
+                sqlList.addAll(getSpecialTransformSql(dbTableMap, count, partition.toString(), filters, Strings.join(leftColumnList, ','), Strings.join(rightColumnList, ','), sourceConnect, targetConnect));
                 if (optimizationConfig.getLightweightQuery()) {
                     count += 3;
                 }
@@ -485,7 +515,7 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
     }
 
     private List<String> getSpecialTransformSql(Map<String, String> dbTableMap, int count, String filter, Map<String, String> filters
-        , String columns, Map sourceConnect, Map targetConnect) {
+        , String columns,String rightColumns, Map sourceConnect, Map targetConnect) {
         // Solve partition fields.
         List<String> partitionFields = new ArrayList<>();
         if (StringUtils.isNotBlank(filter)) {
@@ -509,7 +539,7 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
         if (CollectionUtils.isNotEmpty(partitionFields)) {
             if (StringUtils.isNotBlank(columns)) {
                 sourceSql.append("select ").append(columns);
-                targetSql.append("select ").append(columns);
+                targetSql.append("select ").append(rightColumns);
             } else {
                 sourceSql.append("select *");
                 targetSql.append("select *");
@@ -519,7 +549,7 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
         } else {
             if (StringUtils.isNotBlank(columns)) {
                 sourceSql.append("select ").append(columns);
-                targetSql.append("select ").append(columns);
+                targetSql.append("select ").append(rightColumns);
             } else {
                 sourceSql.append("select *");
                 targetSql.append("select *");
@@ -593,12 +623,12 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
     private void fuleLineToHashLine(List<String> transformSql, List<String> partitionFields) {
         transformSql.add("val fillNullDF = originalDF.na.fill(UUID)");
         transformSql.add("val qualitis_names = fillNullDF.schema.fieldNames");
-        transformSql.add("val fileNullWithFullLineWithHashDF = fillNullDF.withColumn(\"qualitis_full_line_value\", to_json(struct($\"*\"))).withColumn(\"qualitis_full_line_hash_value\", md5(to_json(struct($\"*\"))))");
+        transformSql.add("val fileNullWithFullLineWithHashDF = fillNullDF.withColumn(\"qualitis_full_line_value\", to_json(struct(qualitis_names.map(col):_*))).withColumn(\"qualitis_full_line_hash_value\", md5(concat_json_values(to_json(struct(qualitis_names.map(col):_*)))))");
         transformSql.add("val qualitis_names_buffer = qualitis_names.toBuffer");
 
         transformSql.add("val fillNullDF_2 = originalDF_2.na.fill(UUID)");
         transformSql.add("val qualitis_names_2 = fillNullDF_2.schema.fieldNames");
-        transformSql.add("val fileNullWithFullLineWithHashDF_2 = fillNullDF_2.withColumn(\"qualitis_full_line_value\", to_json(struct($\"*\"))).withColumn(\"qualitis_full_line_hash_value\", md5(to_json(struct($\"*\"))))");
+        transformSql.add("val fileNullWithFullLineWithHashDF_2 = fillNullDF_2.withColumn(\"qualitis_full_line_value\", to_json(struct(qualitis_names_2.map(col):_*))).withColumn(\"qualitis_full_line_hash_value\", md5(concat_json_values(to_json(struct(qualitis_names_2.map(col):_*)))))");
         transformSql.add("val qualitis_names_buffer_2 = qualitis_names_2.toBuffer");
 
         for (String partitionField : partitionFields) {
@@ -616,6 +646,8 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
         List<String> imports = new ArrayList<>();
         imports.add("import org.apache.spark.sql.types._");
         imports.add("import org.apache.spark.sql.functions._");
+        imports.add("import com.fasterxml.jackson.databind.ObjectMapper");
+        imports.add("import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}");
         return imports;
     }
 
@@ -651,7 +683,8 @@ public class SqlTemplateConverter extends AbstractTemplateConverter {
         boolean linePrimaryRepeat = CollectionUtils.isNotEmpty(midTableInputNames) && (midTableInputNames.contains(EN_LINE_PRIMARY_REPEAT) || midTableInputNames.contains(CN_LINE_PRIMARY_REPEAT) || midTableInputNames.contains(MESSAGE_LINE_PRIMARY_REPEAT));
         if (linePrimaryRepeat) {
             sparkSqlList.add("val fillNullDF_" + count + " = " + getVariableName(count) + ".na.fill(UUID)");
-            sparkSqlList.add("val fileNullWithFullLineWithHashDF_" + count + " = fillNullDF_" + count + ".withColumn(\"qualitis_full_line_value\", to_json(struct($\"*\"))).withColumn(\"md5\", md5(to_json(struct($\"*\"))))");
+            sparkSqlList.add("val qualitis_names = fillNullDF_" + count + ".schema.fieldNames");
+            sparkSqlList.add("val fileNullWithFullLineWithHashDF_" + count + " = fillNullDF_" + count + ".withColumn(\"(md5\", md5(concat_json_values(to_json(struct(qualitis_names.map(col):_*))))).withColumn(\"qualitis_full_line_value\", to_json(struct(qualitis_names.map(col):_*)))");
             sparkSqlList.add("fileNullWithFullLineWithHashDF_" + count + ".registerTempTable(\"tmp_table_" + count + "\")");
             sparkSqlList.add("val " + getVariableName(count) + " = spark.sql(\"select md5, count(1) as md5_count from tmp_table_" + count + " group by md5 having count(*) > 1\")");
         }

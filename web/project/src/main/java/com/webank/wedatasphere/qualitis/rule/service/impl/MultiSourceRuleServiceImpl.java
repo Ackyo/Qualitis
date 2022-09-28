@@ -173,13 +173,13 @@ public class MultiSourceRuleServiceImpl implements MultiSourceRuleService {
             savedRule.setStaticStartupParam(request.getStaticStartupParam());
         }
         savedRule = ruleDao.saveRule(savedRule);
-        if (templateInDb.getChildTemplate() != null) {
-            // Generate child rule
-            AddMultiSourceRuleRequest addMultiSourceRuleRequest = generateChildRequest(request, templateInDb.getChildTemplate());
-            Rule childRule = generateRule(addMultiSourceRuleRequest, null, false, null, true, cs, leftUuid, rightUuid, loginUser);
-            childRule.setParentRule(savedRule);
-            ruleDao.saveRule(childRule);
-        }
+//        if (templateInDb.getChildTemplate() != null) {
+//            // Generate child rule
+//            AddMultiSourceRuleRequest addMultiSourceRuleRequest = generateChildRequest(request, templateInDb.getChildTemplate());
+//            Rule childRule = generateRule(addMultiSourceRuleRequest, null, false, null, true, cs, leftUuid, rightUuid, loginUser);
+//            childRule.setParentRule(savedRule);
+//            ruleDao.saveRule(childRule);
+//        }
 
         RuleResponse response = new RuleResponse(savedRule);
         LOGGER.info("Succeed to add multi source rule, rule_id: {}", savedRule.getId());
@@ -305,14 +305,14 @@ public class MultiSourceRuleServiceImpl implements MultiSourceRuleService {
         String leftUuid = UuidGenerator.generate();
         String rightUuid = UuidGenerator.generate();
         Rule savedRule = generateRule(addMultiSourceRuleRequest, projectInDb, true, ruleInDb, false, cs, leftUuid, rightUuid, loginUser);
-        if (templateInDb.getChildTemplate() != null) {
-            // Generate child rule
-            AddMultiSourceRuleRequest childRequest = generateChildRequest(addMultiSourceRuleRequest, templateInDb.getChildTemplate());
-            Rule childRule = generateRule(childRequest, null, false, null, true, cs, leftUuid, rightUuid, loginUser);
-            childRule.setParentRule(savedRule);
-            ruleDao.saveRule(childRule);
-            LOGGER.info("Succeed to generate child rule");
-        }
+//        if (templateInDb.getChildTemplate() != null) {
+//            // Generate child rule
+//            AddMultiSourceRuleRequest childRequest = generateChildRequest(addMultiSourceRuleRequest, templateInDb.getChildTemplate());
+//            Rule childRule = generateRule(childRequest, null, false, null, true, cs, leftUuid, rightUuid, loginUser);
+//            childRule.setParentRule(savedRule);
+//            ruleDao.saveRule(childRule);
+//            LOGGER.info("Succeed to generate child rule");
+//        }
 
         RuleResponse response = new RuleResponse(savedRule);
         LOGGER.info("Succeed to modify multi source rule, rule_id: {}", savedRule.getId());
