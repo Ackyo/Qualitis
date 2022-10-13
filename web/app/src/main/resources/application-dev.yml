@@ -113,7 +113,7 @@ linkis:
       reparation: 50
     engine:
       name: spark
-      version: 2.4.3
+      version: [spark_version]
   log:
     maskKey: task.persistent.username, task.persistent.password
 
@@ -124,6 +124,7 @@ front_end:
   center: dev
 
 ldap:
-  ip: xx
-  port: 00
+  ip: [ldap_ip]
+  port: [ldap_port]
+  userNameFormat: [ldap_user_format]
 
