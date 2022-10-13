@@ -1,6 +1,7 @@
 package com.webank.wedatasphere.qualitis.util;
 
 import com.webank.wedatasphere.qualitis.config.LdapConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.opendj.ldap.Connection;
 import org.forgerock.opendj.ldap.LDAPConnectionFactory;
 import org.forgerock.opendj.ldap.LdapException;
@@ -31,10 +32,17 @@ public class LdapUtil {
             LOGGER.info("connecting failed. please check ip :" + ldapConfig.getIp() + " port: " + ldapConfig.getPort());
             return false;
         }
-        BindRequest request = Requests.newSimpleBindRequest(userName , password.getBytes());
+
+        String userNameFormat = ldapConfig.getUserNameFormat();
+        String bindDN = userName;
+        if (!StringUtils.isBlank(userNameFormat)) {
+            bindDN = String.format(userNameFormat, userName);
+        }
+
+        BindRequest request = Requests.newSimpleBindRequest(bindDN , password.getBytes());
         try {
             conn.bind(request);
-            LOGGER.info("Login by ladp success! User: {}", userName);
+            LOGGER.info("Login by ladp success! User: {}", bindDN);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return false;

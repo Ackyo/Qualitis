@@ -13,6 +13,8 @@ public class LdapConfig {
     private String ip;
     @Value("${ldap.port}")
     private int port;
+    @Value("${ldap.userNameFormat}")
+    private String userNameFormat;
 
     public LdapConfig() {
     }
@@ -32,4 +34,12 @@ public class LdapConfig {
     public void setPort(int port) {
         this.port = port;
     }
+    public String getUserNameFormat() {
+        return userNameFormat;
+    }
+
+    public void setUserNameFormat(String userNameFormat) {
+        this.userNameFormat = userNameFormat;
+    }
+
 }
