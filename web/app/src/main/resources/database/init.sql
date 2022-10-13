@@ -1258,7 +1258,7 @@ insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeh
 	values(20001, "{&SOURCE_TABLE_COLUMN_IS_NULL}", 18, "source_column_is_null", 10, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${source_column_is_null}", "${source_column} IS NULL");
 insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description, concat_template)
 	values(20002, "{&TARGET_TABLE_COLUMN_IS_NULL}", 18, "target_column_is_null", 10, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${target_column_is_null}", "${target_column} IS NULL");
-insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description)
+insert into qualitis_template_mid_table_input_meta(id, name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description, concat_template)
 	values(20003, "{&FILTER_IN_RESULT}", 18, "filter", 9, null, false, null, "{&REPLACE_PLACEHOLDER_IN_SQL}${filter}", "${filter}");
 
 insert into qualitis_template_mid_table_input_meta(name, template_id, placeholder, input_type, field_type, replace_by_request, regexp_type, placeholder_description, parent_id)
